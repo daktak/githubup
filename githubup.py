@@ -28,7 +28,7 @@ if email_on:
 	email_subject = config['Email']['subject']
 	email_server = config['Email']['server']
 output = '' 
-i = 0 
+i = -1 
 triggered_email = 0 
 LATEST_VERSION = None
 
@@ -37,10 +37,10 @@ for repo in repos:
 	i = i + 1
 	dir = dirprefix+names[i]
 	output = output+os.linesep
-	update_cmd = update_cmd.replace('%name',names[i])
-	update_cmd = update_cmd.replace('%repo',repo[i])
-	update_cmd = update_cmd.replace('%owner',users[i])
-	update_cmd = update_cmd.replace('%branch',branchs[i])
+	new_update_cmd = update_cmd.replace('%name',names[i])
+	new_update_cmd = new_update_cmd.replace('%repo',repo[i])
+	new_update_cmd = new_update_cmd.replace('%owner',users[i])
+	new_update_cmd = new_update_cmd.replace('%branch',branchs[i])
 
 	version_file = os.path.join('%s' % dir, 'version.txt')
 
@@ -77,7 +77,7 @@ for repo in repos:
 		if COMMITS_BEHIND >= int(commit_threshold):
 			triggered_email = 1
 			output = output+'Running update for '+names[i]+os.linesep
-			output = output+commands.getoutput(update_cmd)+os.linesep
+			output = output+commands.getoutput(new_update_cmd)+os.linesep
 	
 	else:
 		output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
