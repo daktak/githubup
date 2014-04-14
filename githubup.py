@@ -28,7 +28,7 @@ if email_on:
 	email_subject = config['Email']['subject']
 	email_server = config['Email']['server']
 output = '' 
-i = -1
+i = 0 
 triggered_email = 0 
 LATEST_VERSION = None
 
