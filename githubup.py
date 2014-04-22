@@ -41,7 +41,7 @@ if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_notify = 1 
+triggered_notify = 0 
 LATEST_VERSION = None
 COMMITS_BEHIND = 0
 
