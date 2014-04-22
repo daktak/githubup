@@ -1,10 +1,13 @@
 #!/usr/bin/env python2
 import os
 import urllib2
+import urllib
 import json
 import smtplib
 import commands
+
 from configobj import ConfigObj
+from urllib import urlencode
 
 try:
     confFile = sys.argv[2]
@@ -21,15 +24,18 @@ branchs = config ['Options']['branch']
 update_cmd = config['Options']['update_cmd']
 commit_threshold = config['Options']['commit_threshold']
 email_on = config['Notifications']['email']
+boxcar_on = config['Notifications']['boxcar']
 if email_on:
 	email_always = config['Email']['email_always']
 	email_to = config['Email']['to']
 	email_from = config['Email']['from']
 	email_subject = config['Email']['subject']
 	email_server = config['Email']['server']
+if boxcar_on:
+	boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_email = 0 
+triggered_notify = 0 
 LATEST_VERSION = None
 
 
@@ -75,7 +81,7 @@ for repo in repos:
 			output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
 
 		if COMMITS_BEHIND >= int(commit_threshold):
-			triggered_email = 1
+			triggered_notify = 1
 			output = output+'Running update for '+names[i]+os.linesep
 			output = output+commands.getoutput(new_update_cmd)+os.linesep
 	
@@ -85,10 +91,25 @@ for repo in repos:
 print ( output )
 if email_on:
     if email_always == 1:
-	triggered_email = 1
-    if triggered_email:
+	triggered_notify = 1
+    if triggered_notify:
 	print ( 'Email being sent to %s' % email_to)
 	body = ('From: %s' % email_from)+os.linesep+('To: %s' % email_to)+os.linesep+('Subject: %s' % email_subject)+os.linesep+os.linesep+output+os.linesep
 	server=smtplib.SMTP(email_server)
 	server.sendmail(email_from,email_to,body)
 	server.quit()
+
+if boxcar_on:
+  if triggered_notify:
+    try:
+      data = urllib.urlencode({
+      'user_credentials': boxcar_token,
+      'notification[title]': email_subject.encode('utf-8'),
+      'notification[long_message]': output.encode('utf-8'),
+      'notification[sound]': "done"
+      })
+      req = urllib2.Request(url)
+      handle = urllib2.urlopen(req, data)
+      handle.close()
+    except urllib2.URLError, e:
+      print ('Error sending Boxcar2 Notification: %s' % e)
