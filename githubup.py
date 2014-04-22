@@ -1,26 +1,32 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import os
-import urllib2
 import urllib
 import json
 import smtplib
-import commands
-
-from configobj import ConfigObj
-from urllib import urlencode
+import configparser
+import shlex
+from urllib import request
 
 try:
     confFile = sys.argv[2]
 except :
     confFile = '/etc/githubup/githubup.ini'
 
-config = ConfigObj(confFile)
 
-users = config['Options']['owner']
-repos = config['Options']['repo']
+def getList(st):
+	my_splitter = shlex.shlex(st, posix=True)
+	my_splitter.whitespace += ','
+	my_splitter.whitespace_split = True
+	return list(my_splitter)
+
+config = configparser.ConfigParser()
+config.read(confFile)
+
+users = getList(config['Options']['owner'])
+repos = getList(config['Options']['repo'])
 dirprefix = config['Options']['dirprefix']
-names = config['Options']['name']
-branchs = config ['Options']['branch'] 
+names = getList(config['Options']['name'])
+branchs = getList(config ['Options']['branch'])
 update_cmd = config['Options']['update_cmd']
 commit_threshold = config['Options']['commit_threshold']
 email_on = config['Notifications']['email']
@@ -35,9 +41,9 @@ if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_notify = 0 
+triggered_notify = 1 
 LATEST_VERSION = None
-
+COMMITS_BEHIND = 0
 
 for repo in repos:
     i = i + 1
@@ -56,9 +62,9 @@ for repo in repos:
 
     url = 'https://api.github.com/repos/%s/%s/commits/%s' % (users[i], repo, branchs[i])
     try:
-        result = urllib2.urlopen(url).read()
-        git = json.loads(result)
-        LATEST_VERSION = git['sha']
+    	result = urllib.request.urlopen(url).read()
+    	git = json.loads(result.decode("utf8"))
+    	LATEST_VERSION = git['sha']
     except:
         output = output+('Could not get the latest commit from github for %s' % names[i])+os.linesep
     if CURRENT_VERSION:
@@ -66,8 +72,8 @@ for repo in repos:
         #print ( 'Comparing currently installed version with latest github version')
             url = 'https://api.github.com/repos/%s/%s/compare/%s...%s' % (users[i], repo, CURRENT_VERSION, LATEST_VERSION)
             try:
-                result = urllib2.urlopen(url).read()
-                git = json.loads(result)
+                result = urllib.request.urlopen(url).read()
+                git = json.loads(result.decode("utf8"))
                 COMMITS_BEHIND = git['total_commits']
             except: 
                 output = output+( 'Could not get commits behind from github for %s' % names[i])+os.linesep
@@ -102,14 +108,15 @@ if email_on:
 if boxcar_on:
   if triggered_notify:
     try:
-      data = urllib.urlencode({
+      data = urllib.parse.urlencode({
       'user_credentials': boxcar_token,
       'notification[title]': email_subject.encode('utf-8'),
       'notification[long_message]': output.encode('utf-8'),
       'notification[sound]': "done"
       })
-      req = urllib2.Request(url)
-      handle = urllib2.urlopen(req, data)
+      data = data.encode('utf-8')
+      req = urllib.request.Request(url)
+      handle = urllib.request.urlopen(req, data)
       handle.close()
-    except (urllib2.URLError, e):
+    except  urllib.error.URLError as e:
       print ('Error sending Boxcar2 Notification: %s' % e)
