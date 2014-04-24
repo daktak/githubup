@@ -108,6 +108,7 @@ if email_on:
 if boxcar_on:
   if triggered_notify:
     try:
+      url = 'https://new.boxcar.io/api/notifications'
       data = urllib.parse.urlencode({
       'user_credentials': boxcar_token,
       'notification[title]': email_subject.encode('utf-8'),
