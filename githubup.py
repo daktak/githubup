@@ -5,6 +5,7 @@ import json
 import smtplib
 import configparser
 import shlex
+import subprocess
 from urllib import request
 
 try:
@@ -41,7 +42,7 @@ if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_notify = 0 
+triggered_notify = 0
 LATEST_VERSION = None
 COMMITS_BEHIND = 0
 
@@ -89,7 +90,7 @@ for repo in repos:
         if COMMITS_BEHIND >= int(commit_threshold):
             triggered_notify = 1
             output = output+'Running update for '+names[i]+os.linesep
-            output = output+commands.getoutput(new_update_cmd)+os.linesep
+            output = output+subprocess.check_output(new_update_cmd, shell=True).decode("utf8")+os.linesep
     
     else:
         output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
