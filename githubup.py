@@ -96,7 +96,7 @@ for repo in repos:
         output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
 
 print ( output )
-if email_on:
+if email_on == 1:
     if email_always == 1:
     	triggered_notify = 1
     if triggered_notify:
@@ -106,7 +106,7 @@ if email_on:
     	server.sendmail(email_from,email_to,body)
     	server.quit()
 
-if boxcar_on:
+if boxcar_on == 1:
   if triggered_notify:
     try:
       url = 'https://new.boxcar.io/api/notifications'
