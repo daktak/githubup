@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os
+import os,sys
 import urllib
 import json
 import smtplib
@@ -9,7 +9,7 @@ import subprocess
 from urllib import request
 
 try:
-    confFile = sys.argv[2]
+    confFile = sys.argv[1]
 except :
     confFile = '/etc/githubup/githubup.ini'
 
