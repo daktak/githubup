@@ -51,7 +51,7 @@ for repo in repos:
     dir = dirprefix+names[i]
     output = output+os.linesep
     new_update_cmd = update_cmd.replace('%name',names[i])
-    new_update_cmd = new_update_cmd.replace('%repo',repo[i])
+    new_update_cmd = new_update_cmd.replace('%repo',repo)
     new_update_cmd = new_update_cmd.replace('%owner',users[i])
     new_update_cmd = new_update_cmd.replace('%branch',branchs[i])
 
