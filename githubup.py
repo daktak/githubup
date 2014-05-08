@@ -7,7 +7,7 @@ import configparser
 import shlex
 import subprocess
 from urllib import request
-
+import csv
 try:
     confFile = sys.argv[1]
 except :
@@ -30,10 +30,10 @@ names = getList(config['Options']['name'])
 branchs = getList(config ['Options']['branch'])
 update_cmd = config['Options']['update_cmd']
 commit_threshold = config['Options']['commit_threshold']
-email_on = config['Notifications']['email']
-boxcar_on = config['Notifications']['boxcar']
+email_on = int(config['Notifications']['email'])
+boxcar_on = int(config['Notifications']['boxcar'])
 if email_on:
-    email_always = config['Email']['email_always']
+    email_always = int(config['Email']['email_always'])
     email_to = config['Email']['to']
     email_from = config['Email']['from']
     email_subject = config['Email']['subject']
@@ -42,7 +42,7 @@ if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_notify = 0
+triggered_notify = False
 LATEST_VERSION = None
 COMMITS_BEHIND = 0
 
@@ -88,7 +88,7 @@ for repo in repos:
             output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
 
         if COMMITS_BEHIND >= int(commit_threshold):
-            triggered_notify = 1
+            triggered_notify = True
             output = output+'Running update for '+names[i]+os.linesep
             output = output+subprocess.check_output(new_update_cmd, shell=True).decode("utf8")+os.linesep
     
@@ -96,19 +96,23 @@ for repo in repos:
         output = output+('You are running an unknown version of %s.' % names[i])+os.linesep
 
 print ( output )
-if email_on == 1:
-    if email_always == 1:
-    	triggered_notify = 1
-    if triggered_notify:
+print ("Triggered: "+str(triggered_notify))
+print ("Email: "+str(email_on))
+if (email_on):
+    print ("Email Always: "+str(email_always))
+    if (email_always):
+    	triggered_notify = True 
+    if (triggered_notify):
     	print ( 'Email being sent to %s' % email_to)
     	body = ('From: %s' % email_from)+os.linesep+('To: %s' % email_to)+os.linesep+('Subject: %s' % email_subject)+os.linesep+os.linesep+output+os.linesep
     	server=smtplib.SMTP(email_server)
     	server.sendmail(email_from,email_to,body)
     	server.quit()
-
-if boxcar_on == 1:
-  if triggered_notify:
+print ("Boxcar: "+str(boxcar_on))
+if (boxcar_on):
+  if (triggered_notify):
     try:
+      print ('Notifying via boxcar')
       url = 'https://new.boxcar.io/api/notifications'
       data = urllib.parse.urlencode({
       'user_credentials': boxcar_token,
