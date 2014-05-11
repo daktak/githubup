@@ -36,8 +36,8 @@ if email_on:
     email_always = int(config['Email']['email_always'])
     email_to = config['Email']['to']
     email_from = config['Email']['from']
-    email_subject = config['Email']['subject']
     email_server = config['Email']['server']
+email_subject = config['Email']['subject']
 if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
