@@ -117,7 +117,7 @@ if (boxcar_on):
       data = urllib.parse.urlencode({
       'user_credentials': boxcar_token,
       'notification[title]': email_subject.encode('utf-8'),
-      'notification[long_message]': output.encode('utf-8'),
+      'notification[long_message]': output.replace(os.linesep, "<br />").encode('utf-8'),
       'notification[sound]': "done"
       })
       data = data.encode('utf-8')
