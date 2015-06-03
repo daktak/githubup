@@ -37,12 +37,16 @@ if email_on:
     email_to = config['Email']['to']
     email_from = config['Email']['from']
     email_server = config['Email']['server']
+    email_method = config['Email']['method']
+    email_port = config['Email']['port']
+    email_user = config['Email']['login']
+    email_pass = config['Email']['pass']
 email_subject = config['Email']['subject']
 if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 output = '' 
 i = -1 
-triggered_notify = False
+triggered_notify = False 
 LATEST_VERSION = None
 COMMITS_BEHIND = 0
 
@@ -103,11 +107,16 @@ if (email_on):
     if (email_always):
     	triggered_notify = True 
     if (triggered_notify):
-    	print ( 'Email being sent to %s' % email_to)
-    	body = ('From: %s' % email_from)+os.linesep+('To: %s' % email_to)+os.linesep+('Subject: %s' % email_subject)+os.linesep+os.linesep+output+os.linesep
-    	server=smtplib.SMTP(email_server)
-    	server.sendmail(email_from,email_to,body)
-    	server.quit()
+        print ( 'Email being sent to %s' % email_to)
+        body = ('From: %s' % email_from)+os.linesep+('To: %s' % email_to)+os.linesep+('Subject: %s' % email_subject)+os.linesep+os.linesep+output+os.linesep
+        server=smtplib.SMTP(email_server,email_port)
+        if email_method=='STARTTLS':
+            server.ehlo()
+            server.starttls()
+        if not email_user=='':
+            server.login(email_user,email_pass)
+        server.sendmail(email_from,email_to,body)
+        server.quit()
 print ("Boxcar: "+str(boxcar_on))
 if (boxcar_on):
   if (triggered_notify):
