@@ -32,6 +32,7 @@ update_cmd = config['Options']['update_cmd']
 commit_threshold = config['Options']['commit_threshold']
 email_on = int(config['Notifications']['email'])
 boxcar_on = int(config['Notifications']['boxcar'])
+androidpn_on = int(config['Notifications']['androidpn'])
 if email_on:
     email_always = int(config['Email']['email_always'])
     email_to = config['Email']['to']
@@ -44,6 +45,8 @@ if email_on:
 email_subject = config['Email']['subject']
 if boxcar_on:
     boxcar_token = config['Boxcar']['token']
+if androidpn_on:
+    androidpn_url = config['AndroidPN']['url']
 output = '' 
 i = -1 
 triggered_notify = False 
@@ -135,3 +138,23 @@ if (boxcar_on):
       handle.close()
     except  urllib.error.URLError as e:
       print ('Error sending Boxcar2 Notification: %s' % e)
+print ("AndroidPN: "+str(androidpn_on))
+if (androidpn_on):
+    if (triggered_notify):
+     try:
+       print ('Notifying via AndroidPN')
+       #curl --data "title=test&message=eu&action=send&broadcast=Y&uri=" http://192.168.1.10:7071/notification.do
+       data = urllib.parse.urlencode({
+       'title': email_subject.encode('utf-8'),
+       'message': output.encode('utf-8'),
+       'action': "send",
+       'broadcast': "Y",
+       'uri': ""
+       })
+       data = data.encode('utf-8')
+       req = urllib.request.Request(androidpn_url)
+       handle = urllib.request.urlopen(req, data)
+       handle.close()
+     except  urllib.error.URLError as e:
+      print ('Error sending Boxcar2 Notification: %s' % e)
+
