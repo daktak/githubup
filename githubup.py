@@ -47,6 +47,8 @@ if boxcar_on:
     boxcar_token = config['Boxcar']['token']
 if androidpn_on:
     androidpn_url = config['AndroidPN']['url']
+    androidpn_broadcast = config['AndroidPN']['broadcast']
+    androidpn_username = config['AndroidPN']['username']
 output = '' 
 i = -1 
 triggered_notify = False 
@@ -148,8 +150,9 @@ if (androidpn_on):
        'title': email_subject.encode('utf-8'),
        'message': output.encode('utf-8'),
        'action': "send",
-       'broadcast': "Y",
-       'uri': ""
+       'broadcast': androidpn_broadcast,
+       'uri': "",
+       'username': androidpn_username
        })
        data = data.encode('utf-8')
        req = urllib.request.Request(androidpn_url)
